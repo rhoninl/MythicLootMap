@@ -3,6 +3,11 @@
 local ADDON_NAME, ns = ...
 local EquipMap = ns
 
+-- Safety fallback: if Locales.lua failed to load, create L with key-as-value fallback
+if not EquipMap.L then
+    EquipMap.L = setmetatable({}, { __index = function(_, k) return k end })
+end
+
 -- Equipment location -> inventory slot ID (single slot items)
 EquipMap.EQUIPLOC_TO_SLOT = {
     INVTYPE_HEAD = 1,
