@@ -98,32 +98,6 @@ function MainFrame:CreateFilterBar(parent)
     dungeonDropdown:SetDefaultText("All Dungeons")
     self.dungeonDropdown = dungeonDropdown
 
-    -- Key level dropdown
-    local keyDropdown = CreateFrame("DropdownButton", nil, bar, "WowStyle1DropdownTemplate")
-    keyDropdown:SetPoint("LEFT", dungeonDropdown, "RIGHT", 10, 0)
-    keyDropdown:SetDefaultText("+10")
-    self.keyDropdown = keyDropdown
-
-    keyDropdown:SetupMenu(function(dropdown, rootDescription)
-        local keyLevels = { 0, 2, 3, 4, 5, 6, 7, 8, 9, 10 }
-        for _, level in ipairs(keyLevels) do
-            local label = level == 0 and "M0" or ("+" .. level)
-            local ilvl = EquipMap:GetMPlusIlvl(level)
-            local text = string.format("%s (ilvl %d)", label, ilvl)
-            rootDescription:CreateRadio(
-                text,
-                function() return EquipMap.selectedKeyLevel == level end,
-                function()
-                    EquipMap.selectedKeyLevel = level
-                    -- Reload data so EJ links reflect the new key level
-                    EquipMap.Data:LoadDungeonData()
-                    EquipMap.Data:UpdateComparisons()
-                    MainFrame:Refresh()
-                end
-            )
-        end
-    end)
-
     -- Spec filter checkbox
     local specCheck = self:CreateCheckbox(bar, "My Spec", function(checked)
         EquipMap.Filters:SetSpecFilter(checked)
@@ -141,7 +115,7 @@ function MainFrame:CreateFilterBar(parent)
         EquipMap.Data:UpdateComparisons()
         MainFrame:Refresh()
     end)
-    specCheck:SetPoint("LEFT", keyDropdown, "RIGHT", 10, 0)
+    specCheck:SetPoint("LEFT", dungeonDropdown, "RIGHT", 20, 0)
     self.specCheck = specCheck
 
     -- Upgrades only checkbox
@@ -304,20 +278,6 @@ function MainFrame:SetupRowWidgets(row)
             GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
             local ok = pcall(GameTooltip.SetHyperlink, GameTooltip, self.itemLink)
             if ok then
-                -- Append M+ ilvl info since the EJ link doesn't reflect key level scaling
-                local keyLabel = EquipMap.selectedKeyLevel == 0 and "M0" or ("+" .. EquipMap.selectedKeyLevel)
-                local ilvl = EquipMap:GetMPlusIlvl()
-                local vaultIlvl = EquipMap:GetVaultIlvl()
-                GameTooltip:AddLine(" ")
-                GameTooltip:AddDoubleLine(
-                    "|cFFFFD100EquipMap M+ " .. keyLabel .. "|r",
-                    "|cFFFFFFFFEnd of Dungeon: " .. ilvl .. "  |  Great Vault: " .. vaultIlvl .. "|r"
-                )
-                if self.ilvlDelta then
-                    local deltaColor = self.ilvlDelta > 0 and "|cFF00FF00" or
-                                       self.ilvlDelta < 0 and "|cFFFF0000" or "|cFFFFFFFF"
-                    GameTooltip:AddLine(deltaColor .. "Compared to equipped: " .. (self.ilvlDelta > 0 and "+" or "") .. self.ilvlDelta .. " ilvl|r")
-                end
                 GameTooltip:Show()
             end
         end
@@ -334,7 +294,6 @@ end
 
 function MainFrame:SetRowData(row, item)
     row.itemLink = item.itemLink
-    row.ilvlDelta = item.ilvlDelta
 
     if item.icon then
         row.icon:SetTexture(item.icon)
@@ -407,13 +366,7 @@ function MainFrame:Refresh()
     scrollBox:SetDataProvider(dataProvider)
 
     local totalItems = #EquipMap.db.items
-    local keyLabel = EquipMap.selectedKeyLevel == 0 and "M0" or ("+" .. EquipMap.selectedKeyLevel)
-    local ilvl = EquipMap:GetMPlusIlvl()
-    local vaultIlvl = EquipMap:GetVaultIlvl()
-    statusText:SetText(string.format(
-        "Showing %d / %d items  |  Key: %s  |  End of Dungeon: %d  |  Great Vault: %d",
-        #filteredItems, totalItems, keyLabel, ilvl, vaultIlvl
-    ))
+    statusText:SetText(string.format("Showing %d / %d items", #filteredItems, totalItems))
 end
 
 function MainFrame:Toggle()

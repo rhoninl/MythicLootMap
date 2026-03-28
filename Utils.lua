@@ -79,54 +79,8 @@ EquipMap.FILTER_SLOTS = {
     { id = 17, name = "Off Hand" },
 }
 
--- M+ difficulty ID for Encounter Journal
-EquipMap.MYTHIC_KEYSTONE_DIFFICULTY = 8
-
--- Midnight Season 1: M+ end-of-dungeon ilvl by key level
--- Key levels beyond +10 still drop +10 ilvl gear
-EquipMap.MPLUS_ILVL_TABLE = {
-    [0]  = 246, -- M0: Champion 1/6
-    [2]  = 250, -- Champion 2/6
-    [3]  = 250, -- Champion 2/6
-    [4]  = 253, -- Champion 3/6
-    [5]  = 256, -- Champion 4/6
-    [6]  = 259, -- Hero 1/6
-    [7]  = 259, -- Hero 1/6
-    [8]  = 263, -- Hero 2/6
-    [9]  = 263, -- Hero 2/6
-    [10] = 266, -- Hero 3/6 (cap)
-}
-
--- Midnight Season 1: Great Vault ilvl by key level
-EquipMap.MPLUS_VAULT_ILVL_TABLE = {
-    [0]  = 256, -- Champion 4/6
-    [2]  = 259, -- Hero 1/6
-    [3]  = 259, -- Hero 1/6
-    [4]  = 263, -- Hero 2/6
-    [5]  = 263, -- Hero 2/6
-    [6]  = 266, -- Hero 3/6
-    [7]  = 269, -- Hero 4/6
-    [8]  = 269, -- Hero 4/6
-    [9]  = 269, -- Hero 4/6
-    [10] = 272, -- Myth 1/6
-}
-
--- Default key level for ilvl display
-EquipMap.selectedKeyLevel = 10
-
-function EquipMap:GetMPlusIlvl(keyLevel)
-    keyLevel = keyLevel or self.selectedKeyLevel
-    if keyLevel > 10 then keyLevel = 10 end
-    if keyLevel < 2 and keyLevel ~= 0 then keyLevel = 0 end
-    return self.MPLUS_ILVL_TABLE[keyLevel] or self.MPLUS_ILVL_TABLE[10]
-end
-
-function EquipMap:GetVaultIlvl(keyLevel)
-    keyLevel = keyLevel or self.selectedKeyLevel
-    if keyLevel > 10 then keyLevel = 10 end
-    if keyLevel < 2 and keyLevel ~= 0 then keyLevel = 0 end
-    return self.MPLUS_VAULT_ILVL_TABLE[keyLevel] or self.MPLUS_VAULT_ILVL_TABLE[10]
-end
+-- Mythic (M0) difficulty ID for Encounter Journal
+EquipMap.MYTHIC_DIFFICULTY = 23
 
 -- Color codes
 EquipMap.COLORS = {

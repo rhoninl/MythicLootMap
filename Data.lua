@@ -35,22 +35,11 @@ function Data:LoadDungeonData()
         end
     end
 
-    -- Set M+ difficulty and key level ONCE before the dungeon loop
-    EJ_SetDifficulty(EquipMap.MYTHIC_KEYSTONE_DIFFICULTY)
-    local keyLevel = EquipMap.selectedKeyLevel or 10
-    if keyLevel < 2 then keyLevel = 2 end
-    if C_EncounterJournal.SetPreviewMythicPlusLevel then
-        C_EncounterJournal.SetPreviewMythicPlusLevel(keyLevel)
-    end
-
     -- Build EJ instanceID lookup from all tiers (fallback for EJ_GetInstanceForMap)
     local ejLookupByName = self:BuildEJNameLookup()
 
-    -- Restore difficulty after tier iteration may have changed it
-    EJ_SetDifficulty(EquipMap.MYTHIC_KEYSTONE_DIFFICULTY)
-    if C_EncounterJournal.SetPreviewMythicPlusLevel then
-        C_EncounterJournal.SetPreviewMythicPlusLevel(keyLevel)
-    end
+    -- Set Mythic (M0) difficulty for loot queries
+    EJ_SetDifficulty(EquipMap.MYTHIC_DIFFICULTY)
 
     for _, cmID in ipairs(challengeModeIDs) do
         local name, _, _, _, _, uiMapID = C_ChallengeMode.GetMapUIInfo(cmID)
@@ -189,27 +178,28 @@ function Data:BuildItemEntry(info)
 end
 
 function Data:EnrichItemEntry(entry)
-    local itemName, itemLink, itemQuality, _, _, _, _, _, itemEquipLoc, itemTexture =
-        GetItemInfo(entry.itemID)
+    -- Use the EJ link (has correct difficulty bonus IDs) if available
+    local source = entry.itemLink or entry.itemID
+    local itemName, itemLink, itemQuality, itemLevel, _, _, _, _, itemEquipLoc, itemTexture =
+        GetItemInfo(source)
 
     if itemName then
         if not entry.name or entry.name == "" then
             entry.name = itemName
         end
+        entry.ilvl = itemLevel or 0
         entry.icon = entry.icon or itemTexture
         if itemEquipLoc and itemEquipLoc ~= "" then
             entry.slot = itemEquipLoc
             entry.slotID = EquipMap:ResolveSlotID(itemEquipLoc)
         end
+        -- Keep the EJ link (has M0 bonus IDs)
         if not entry.itemLink and itemLink then
             entry.itemLink = itemLink
         end
     else
         pendingItems[entry.itemID] = entry
     end
-
-    -- M+ ilvl comes from the scaling table
-    entry.ilvl = EquipMap:GetMPlusIlvl()
 
     if C_TransmogCollection and C_TransmogCollection.PlayerHasTransmog then
         entry.owned = C_TransmogCollection.PlayerHasTransmog(entry.itemID, 0)
