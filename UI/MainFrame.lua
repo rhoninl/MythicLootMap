@@ -115,10 +115,8 @@ function MainFrame:CreateFilterBar(parent)
                 function() return EquipMap.selectedKeyLevel == level end,
                 function()
                     EquipMap.selectedKeyLevel = level
-                    -- Re-apply ilvl to all items
-                    for _, item in ipairs(EquipMap.db.items) do
-                        item.ilvl = EquipMap:GetMPlusIlvl()
-                    end
+                    -- Reload data so EJ links reflect the new key level
+                    EquipMap.Data:LoadDungeonData()
                     EquipMap.Data:UpdateComparisons()
                     MainFrame:Refresh()
                 end

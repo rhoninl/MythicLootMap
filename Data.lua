@@ -10,9 +10,6 @@ EquipMap.Data = Data
 -- Pending item data requests for async loading
 local pendingItems = {}
 
--- Default M+ key level for preview (affects displayed ilvl)
-local PREVIEW_MYTHIC_PLUS_LEVEL = 10
-
 function Data:LoadDungeonData()
     EquipMap.db.dungeons = {}
     EquipMap.db.items = {}
@@ -23,7 +20,7 @@ function Data:LoadDungeonData()
         return
     end
 
-    -- Reset EJ state before querying
+    -- Reset ALL EJ state before querying (must be in this exact order)
     EJ_ClearSearch()
     C_EncounterJournal.ResetSlotFilter()
     EJ_ResetLootFilter()
@@ -38,8 +35,22 @@ function Data:LoadDungeonData()
         end
     end
 
+    -- Set M+ difficulty and key level ONCE before the dungeon loop
+    EJ_SetDifficulty(EquipMap.MYTHIC_KEYSTONE_DIFFICULTY)
+    local keyLevel = EquipMap.selectedKeyLevel or 10
+    if keyLevel < 2 then keyLevel = 2 end
+    if C_EncounterJournal.SetPreviewMythicPlusLevel then
+        C_EncounterJournal.SetPreviewMythicPlusLevel(keyLevel)
+    end
+
     -- Build EJ instanceID lookup from all tiers (fallback for EJ_GetInstanceForMap)
     local ejLookupByName = self:BuildEJNameLookup()
+
+    -- Restore difficulty after tier iteration may have changed it
+    EJ_SetDifficulty(EquipMap.MYTHIC_KEYSTONE_DIFFICULTY)
+    if C_EncounterJournal.SetPreviewMythicPlusLevel then
+        C_EncounterJournal.SetPreviewMythicPlusLevel(keyLevel)
+    end
 
     for _, cmID in ipairs(challengeModeIDs) do
         local name, _, _, _, _, uiMapID = C_ChallengeMode.GetMapUIInfo(cmID)
@@ -63,7 +74,6 @@ function Data:LoadDungeonData()
 end
 
 function Data:ResolveEJInstanceID(dungeonName, uiMapID, ejLookupByName)
-    -- Method 1: EJ_GetInstanceForMap (direct API, may fail for legacy dungeons)
     if uiMapID and EJ_GetInstanceForMap then
         local id = EJ_GetInstanceForMap(uiMapID)
         if id and id > 0 then
@@ -71,7 +81,6 @@ function Data:ResolveEJInstanceID(dungeonName, uiMapID, ejLookupByName)
         end
     end
 
-    -- Method 2: Fallback - match by dungeon name across all EJ tiers
     if dungeonName and ejLookupByName then
         return ejLookupByName[dungeonName]
     end
@@ -99,7 +108,6 @@ function Data:BuildEJNameLookup()
         end
     end
 
-    -- Restore original tier
     if savedTier then
         EJ_SelectTier(savedTier)
     end
@@ -108,21 +116,15 @@ function Data:BuildEJNameLookup()
 end
 
 function Data:LoadInstanceLoot(instanceID, dungeonName)
-    -- Order matters: set difficulty and M+ level BEFORE selecting instance
-    EJ_SetDifficulty(EquipMap.MYTHIC_KEYSTONE_DIFFICULTY)
-    if C_EncounterJournal.SetPreviewMythicPlusLevel then
-        C_EncounterJournal.SetPreviewMythicPlusLevel(PREVIEW_MYTHIC_PLUS_LEVEL)
-    end
+    -- Difficulty and preview level are already set in LoadDungeonData
     EJ_SelectInstance(instanceID)
 
-    -- Query all loot for the instance at once (do NOT iterate encounters)
     local numLoot = EJ_GetNumLoot()
     local dungeon = EquipMap.db.dungeons[instanceID]
 
     for lootIndex = 1, numLoot do
         local itemInfo = C_EncounterJournal.GetLootInfoByIndex(lootIndex)
         if itemInfo and itemInfo.itemID then
-            -- Resolve encounter name from encounterID if available
             local encounterName = ""
             local encounterID = itemInfo.encounterID
             if encounterID then
@@ -191,7 +193,9 @@ function Data:EnrichItemEntry(entry)
         GetItemInfo(entry.itemID)
 
     if itemName then
-        entry.name = itemName
+        if not entry.name or entry.name == "" then
+            entry.name = itemName
+        end
         entry.icon = entry.icon or itemTexture
         if itemEquipLoc and itemEquipLoc ~= "" then
             entry.slot = itemEquipLoc
@@ -204,7 +208,7 @@ function Data:EnrichItemEntry(entry)
         pendingItems[entry.itemID] = entry
     end
 
-    -- M+ ilvl comes from the scaling table, not from the base item
+    -- M+ ilvl comes from the scaling table
     entry.ilvl = EquipMap:GetMPlusIlvl()
 
     if C_TransmogCollection and C_TransmogCollection.PlayerHasTransmog then
