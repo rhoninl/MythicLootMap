@@ -40,43 +40,44 @@ EquipMap.ARMOR_TYPES = {
     Plate = 4,
 }
 
--- Slot ID -> display name
+-- Slot ID -> display name (localized)
+local L = EquipMap.L
 EquipMap.SLOT_NAMES = {
-    [1] = "Head",
-    [2] = "Neck",
-    [3] = "Shoulder",
-    [5] = "Chest",
-    [6] = "Waist",
-    [7] = "Legs",
-    [8] = "Feet",
-    [9] = "Wrist",
-    [10] = "Hands",
-    [11] = "Ring",
-    [12] = "Ring",
-    [13] = "Trinket",
-    [14] = "Trinket",
-    [15] = "Back",
-    [16] = "Main Hand",
-    [17] = "Off Hand",
+    [1] = L["Head"],
+    [2] = L["Neck"],
+    [3] = L["Shoulder"],
+    [5] = L["Chest"],
+    [6] = L["Waist"],
+    [7] = L["Legs"],
+    [8] = L["Feet"],
+    [9] = L["Wrist"],
+    [10] = L["Hands"],
+    [11] = L["Ring"],
+    [12] = L["Ring"],
+    [13] = L["Trinket"],
+    [14] = L["Trinket"],
+    [15] = L["Back"],
+    [16] = L["MainHand"],
+    [17] = L["OffHand"],
 }
 
 -- Unique slot IDs for filter dropdown (no duplicates)
 EquipMap.FILTER_SLOTS = {
-    { id = 0, name = "All Slots" },
-    { id = 1, name = "Head" },
-    { id = 2, name = "Neck" },
-    { id = 3, name = "Shoulder" },
-    { id = 15, name = "Back" },
-    { id = 5, name = "Chest" },
-    { id = 9, name = "Wrist" },
-    { id = 10, name = "Hands" },
-    { id = 6, name = "Waist" },
-    { id = 7, name = "Legs" },
-    { id = 8, name = "Feet" },
-    { id = 11, name = "Ring" },
-    { id = 13, name = "Trinket" },
-    { id = 16, name = "Main Hand" },
-    { id = 17, name = "Off Hand" },
+    { id = 0, name = L["AllSlots"] },
+    { id = 1, name = L["Head"] },
+    { id = 2, name = L["Neck"] },
+    { id = 3, name = L["Shoulder"] },
+    { id = 15, name = L["Back"] },
+    { id = 5, name = L["Chest"] },
+    { id = 9, name = L["Wrist"] },
+    { id = 10, name = L["Hands"] },
+    { id = 6, name = L["Waist"] },
+    { id = 7, name = L["Legs"] },
+    { id = 8, name = L["Feet"] },
+    { id = 11, name = L["Ring"] },
+    { id = 13, name = L["Trinket"] },
+    { id = 16, name = L["MainHand"] },
+    { id = 17, name = L["OffHand"] },
 }
 
 -- Mythic (M0) difficulty ID for Encounter Journal
@@ -113,9 +114,9 @@ end
 
 function EquipMap:FormatStatNames(item)
     local names = {}
-    if item.crit and item.crit > 0 then names[#names + 1] = "Crit" end
-    if item.haste and item.haste > 0 then names[#names + 1] = "Haste" end
-    if item.mastery and item.mastery > 0 then names[#names + 1] = "Mastery" end
-    if item.vers and item.vers > 0 then names[#names + 1] = "Vers" end
+    if item.crit and item.crit > 0 then names[#names + 1] = L["Crit"] end
+    if item.haste and item.haste > 0 then names[#names + 1] = L["Haste"] end
+    if item.mastery and item.mastery > 0 then names[#names + 1] = L["Mastery"] end
+    if item.vers and item.vers > 0 then names[#names + 1] = L["Vers"] end
     return table.concat(names, " / ")
 end

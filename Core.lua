@@ -107,16 +107,16 @@ SlashCmdList["EQUIPMAP"] = function(msg)
         ns.MainFrame:InitDungeonDropdown()
         ns.MainFrame:Refresh()
         isLoadingData = false
-        ns:Print("Data reloaded.")
+        ns:Print(ns.L["DataReloaded"])
         return
     end
 
     if msg == "help" then
-        ns:Print("Commands:")
-        print("  /equipmap - Toggle loot browser window")
-        print("  /equipmap reload - Reload dungeon data")
-        print("  /equipmap test - Run test suite")
-        print("  /equipmap help - Show this help")
+        ns:Print(ns.L["Commands"])
+        print(ns.L["CmdToggle"])
+        print(ns.L["CmdReload"])
+        print(ns.L["CmdTest"])
+        print(ns.L["CmdHelp"])
         return
     end
 
@@ -124,4 +124,4 @@ SlashCmdList["EQUIPMAP"] = function(msg)
     ns.MainFrame:Toggle()
 end
 
-ns:Print("Loaded. Type /equipmap to open.")
+ns:Print(ns.L["LoadedMsg"])

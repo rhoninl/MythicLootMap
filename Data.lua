@@ -16,7 +16,7 @@ function Data:LoadDungeonData()
 
     local challengeModeIDs = C_ChallengeMode.GetMapTable()
     if not challengeModeIDs or #challengeModeIDs == 0 then
-        EquipMap:Print("No M+ dungeons found for current season.")
+        EquipMap:Print(EquipMap.L["NoDungeons"])
         return
     end
 
@@ -59,7 +59,7 @@ function Data:LoadDungeonData()
     end
 
     self:RequestMissingItemData()
-    EquipMap:Print(string.format("Loaded %d items from %d dungeons.", #EquipMap.db.items, self:CountDungeons()))
+    EquipMap:Print(string.format(EquipMap.L["Loaded"], #EquipMap.db.items, self:CountDungeons()))
 end
 
 function Data:ResolveEJInstanceID(dungeonName, uiMapID, ejLookupByName)

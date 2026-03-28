@@ -42,7 +42,7 @@ function MainFrame:Create()
     -- Title
     local title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     title:SetPoint("TOP", 0, -16)
-    title:SetText("EquipMap - Mythic+ Loot Browser")
+    title:SetText(EquipMap.L["Title"])
 
     -- Close button
     local closeBtn = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
@@ -74,7 +74,8 @@ function MainFrame:CreateFilterBar(parent)
     -- Slot dropdown
     local slotDropdown = CreateFrame("DropdownButton", nil, bar, "WowStyle1DropdownTemplate")
     slotDropdown:SetPoint("LEFT", 4, 0)
-    slotDropdown:SetDefaultText("All Slots")
+    local L = EquipMap.L
+    slotDropdown:SetDefaultText(L["AllSlots"])
     self.slotDropdown = slotDropdown
 
     local selectedSlot = 0
@@ -95,22 +96,22 @@ function MainFrame:CreateFilterBar(parent)
     -- Dungeon dropdown
     local dungeonDropdown = CreateFrame("DropdownButton", nil, bar, "WowStyle1DropdownTemplate")
     dungeonDropdown:SetPoint("LEFT", slotDropdown, "RIGHT", 10, 0)
-    dungeonDropdown:SetDefaultText("All Dungeons")
+    dungeonDropdown:SetDefaultText(L["AllDungeons"])
     self.dungeonDropdown = dungeonDropdown
 
     -- Stat filter dropdowns
     local statOptions = {
-        { key = nil,       name = "Any" },
-        { key = "crit",    name = "Crit" },
-        { key = "haste",   name = "Haste" },
-        { key = "mastery", name = "Mastery" },
-        { key = "vers",    name = "Vers" },
+        { key = nil,       name = L["Any"] },
+        { key = "crit",    name = L["Crit"] },
+        { key = "haste",   name = L["Haste"] },
+        { key = "mastery", name = L["Mastery"] },
+        { key = "vers",    name = L["Vers"] },
     }
 
     local selectedStat1 = nil
     local stat1Dropdown = CreateFrame("DropdownButton", nil, bar, "WowStyle1DropdownTemplate")
     stat1Dropdown:SetPoint("LEFT", dungeonDropdown, "RIGHT", 10, 0)
-    stat1Dropdown:SetDefaultText("Stat 1")
+    stat1Dropdown:SetDefaultText(L["Stat1"])
     stat1Dropdown:SetupMenu(function(dropdown, rootDescription)
         for _, opt in ipairs(statOptions) do
             rootDescription:CreateRadio(
@@ -128,7 +129,7 @@ function MainFrame:CreateFilterBar(parent)
     local selectedStat2 = nil
     local stat2Dropdown = CreateFrame("DropdownButton", nil, bar, "WowStyle1DropdownTemplate")
     stat2Dropdown:SetPoint("LEFT", stat1Dropdown, "RIGHT", 4, 0)
-    stat2Dropdown:SetDefaultText("Stat 2")
+    stat2Dropdown:SetDefaultText(L["Stat2"])
     stat2Dropdown:SetupMenu(function(dropdown, rootDescription)
         for _, opt in ipairs(statOptions) do
             rootDescription:CreateRadio(
@@ -144,7 +145,7 @@ function MainFrame:CreateFilterBar(parent)
     end)
 
     -- Spec filter checkbox
-    local specCheck = self:CreateCheckbox(bar, "My Spec", function(checked)
+    local specCheck = self:CreateCheckbox(bar, L["MySpec"], function(checked)
         EquipMap.Filters:SetSpecFilter(checked)
         if checked then
             local _, _, classID = UnitClass("player")
@@ -164,7 +165,7 @@ function MainFrame:CreateFilterBar(parent)
     self.specCheck = specCheck
 
     -- Upgrades only checkbox
-    local upgradeCheck = self:CreateCheckbox(bar, "Upgrades", function(checked)
+    local upgradeCheck = self:CreateCheckbox(bar, L["Upgrades"], function(checked)
         EquipMap.Filters:SetUpgradesOnly(checked)
         MainFrame:Refresh()
     end)
@@ -172,7 +173,7 @@ function MainFrame:CreateFilterBar(parent)
     self.upgradeCheck = upgradeCheck
 
     -- Not collected checkbox
-    local collectCheck = self:CreateCheckbox(bar, "Not Collected", function(checked)
+    local collectCheck = self:CreateCheckbox(bar, L["NotCollected"], function(checked)
         EquipMap.Filters:SetNotCollected(checked)
         MainFrame:Refresh()
     end)
@@ -202,16 +203,16 @@ function MainFrame:CreateHeaders(parent)
     headerRow:SetPoint("TOPRIGHT", -28, -(42 + FILTER_BAR_HEIGHT + 4))
     headerRow:SetHeight(HEADER_HEIGHT)
 
+    local L = EquipMap.L
     local headers = {
         { text = "", width = 30 },
-        { text = "Item", width = 180 },
-        { text = "iLvl", width = 45 },
-        { text = "Slot", width = 75 },
-        { text = "Stats", width = 110 },
-        { text = "Dungeon", width = 150 },
-        { text = "Boss", width = 140 },
-        { text = "+/-", width = 50 },
-        { text = "Owned", width = 50 },
+        { text = L["Item"], width = 180 },
+        { text = L["iLvl"], width = 45 },
+        { text = L["Slot"], width = 75 },
+        { text = L["Stats"], width = 110 },
+        { text = L["Dungeon"], width = 180 },
+        { text = L["Boss"], width = 160 },
+        { text = L["Owned"], width = 50 },
     }
 
     local xOffset = 0
@@ -305,18 +306,13 @@ function MainFrame:SetupRowWidgets(row)
 
     row.dungeonText = row:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     row.dungeonText:SetPoint("LEFT", 440, 0)
-    row.dungeonText:SetWidth(150)
+    row.dungeonText:SetWidth(180)
     row.dungeonText:SetJustifyH("LEFT")
 
     row.bossText = row:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    row.bossText:SetPoint("LEFT", 590, 0)
-    row.bossText:SetWidth(140)
+    row.bossText:SetPoint("LEFT", 620, 0)
+    row.bossText:SetWidth(160)
     row.bossText:SetJustifyH("LEFT")
-
-    row.deltaText = row:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    row.deltaText:SetPoint("LEFT", 730, 0)
-    row.deltaText:SetWidth(50)
-    row.deltaText:SetJustifyH("LEFT")
 
     row.ownedText = row:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     row.ownedText:SetPoint("LEFT", 780, 0)
@@ -359,10 +355,9 @@ function MainFrame:SetRowData(row, item)
     row.statsText:SetText(EquipMap:FormatStatNames(item))
     row.dungeonText:SetText(item.dungeonName or "")
     row.bossText:SetText(item.encounterName or "")
-    row.deltaText:SetText(EquipMap.Compare:FormatDelta(item.ilvlDelta))
 
     if item.owned then
-        row.ownedText:SetText(EquipMap.COLORS.OWNED .. "Yes" .. EquipMap.COLORS.RESET)
+        row.ownedText:SetText(EquipMap.COLORS.OWNED .. EquipMap.L["Yes"] .. EquipMap.COLORS.RESET)
     else
         row.ownedText:SetText("")
     end
@@ -380,7 +375,7 @@ function MainFrame:InitDungeonDropdown()
 
     dropdown:SetupMenu(function(dropdown, rootDescription)
         rootDescription:CreateRadio(
-            "All Dungeons",
+            EquipMap.L["AllDungeons"],
             function() return selectedDungeon == 0 end,
             function()
                 selectedDungeon = 0
@@ -425,7 +420,7 @@ function MainFrame:Refresh()
     end
 
     local totalItems = #EquipMap.db.items
-    statusText:SetText(string.format("Showing %d / %d items", #filteredItems, totalItems))
+    statusText:SetText(string.format(EquipMap.L["Showing"], #filteredItems, totalItems))
 end
 
 function MainFrame:Toggle()
