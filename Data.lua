@@ -197,24 +197,23 @@ function Data:EnrichItemEntry(entry)
             entry.slot = itemEquipLoc
             entry.slotID = EquipMap:ResolveSlotID(itemEquipLoc)
         end
-        -- Keep the EJ link (has M0 bonus IDs)
         if not entry.itemLink and itemLink then
             entry.itemLink = itemLink
         end
+
+        -- Extract secondary stats (only works when item data is cached)
+        local statsLink = entry.itemLink or itemLink
+        if statsLink then
+            local stats = C_Item.GetItemStats(statsLink)
+            if stats then
+                entry.crit = stats["ITEM_MOD_CRIT_RATING_SHORT"] or 0
+                entry.haste = stats["ITEM_MOD_HASTE_RATING_SHORT"] or 0
+                entry.mastery = stats["ITEM_MOD_MASTERY_RATING_SHORT"] or 0
+                entry.vers = stats["ITEM_MOD_VERSATILITY"] or 0
+            end
+        end
     else
         pendingItems[entry.itemID] = entry
-    end
-
-    -- Extract secondary stats from item link
-    local link = entry.itemLink
-    if link and GetItemStats then
-        local stats = GetItemStats(link)
-        if stats then
-            entry.crit = stats["ITEM_MOD_CRIT_RATING_SHORT"] or 0
-            entry.haste = stats["ITEM_MOD_HASTE_RATING_SHORT"] or 0
-            entry.mastery = stats["ITEM_MOD_MASTERY_RATING_SHORT"] or 0
-            entry.vers = stats["ITEM_MOD_VERSATILITY"] or 0
-        end
     end
 
     if C_TransmogCollection and C_TransmogCollection.PlayerHasTransmog then
