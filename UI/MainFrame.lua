@@ -142,11 +142,36 @@ function MainFrame:CreateFilterBar(parent)
         end
     end)
 
-    -- Dungeon dropdown
+    -- Dungeon dropdown (generator queries dungeon list dynamically each time)
     local dungeonDropdown = CreateFrame("DropdownButton", nil, bar, "WowStyle1DropdownTemplate")
     dungeonDropdown:SetPoint("LEFT", armorDropdown, "RIGHT", 10, 0)
     dungeonDropdown:SetDefaultText(L["AllDungeons"])
     self.dungeonDropdown = dungeonDropdown
+
+    local selectedDungeon = 0
+    dungeonDropdown:SetupMenu(function(dropdown, rootDescription)
+        rootDescription:CreateRadio(
+            L["AllDungeons"],
+            function() return selectedDungeon == 0 end,
+            function()
+                selectedDungeon = 0
+                EquipMap.Filters:SetDungeon(nil)
+                MainFrame:Refresh()
+            end
+        )
+        local dungeons = EquipMap.Data:GetDungeonList()
+        for _, d in ipairs(dungeons) do
+            rootDescription:CreateRadio(
+                d.name,
+                function() return selectedDungeon == d.instanceID end,
+                function()
+                    selectedDungeon = d.instanceID
+                    EquipMap.Filters:SetDungeon(d.instanceID)
+                    MainFrame:Refresh()
+                end
+            )
+        end
+    end)
 
     -- Stat filter dropdowns
     local statOptions = {
@@ -391,41 +416,8 @@ function MainFrame:SetRowData(row, item)
     row.bossText:SetText(item.encounterName or "")
 end
 
----------------------------------------------------------------------------
--- Dungeon dropdown (initialized after data load)
----------------------------------------------------------------------------
-
-function MainFrame:InitDungeonDropdown()
-    local dropdown = self.dungeonDropdown
-    if not dropdown then return end
-
-    local selectedDungeon = 0
-
-    dropdown:SetupMenu(function(dropdown, rootDescription)
-        rootDescription:CreateRadio(
-            EquipMap.L["AllDungeons"],
-            function() return selectedDungeon == 0 end,
-            function()
-                selectedDungeon = 0
-                EquipMap.Filters:SetDungeon(nil)
-                MainFrame:Refresh()
-            end
-        )
-
-        local dungeons = EquipMap.Data:GetDungeonList()
-        for _, d in ipairs(dungeons) do
-            rootDescription:CreateRadio(
-                d.name,
-                function() return selectedDungeon == d.instanceID end,
-                function()
-                    selectedDungeon = d.instanceID
-                    EquipMap.Filters:SetDungeon(d.instanceID)
-                    MainFrame:Refresh()
-                end
-            )
-        end
-    end)
-end
+-- InitDungeonDropdown kept as no-op for backward compat with Core.lua calls
+function MainFrame:InitDungeonDropdown() end
 
 ---------------------------------------------------------------------------
 -- Refresh / Toggle
