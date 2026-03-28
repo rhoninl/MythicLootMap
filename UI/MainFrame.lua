@@ -103,9 +103,36 @@ function MainFrame:CreateFilterBar(parent)
         end
     end)
 
+    -- Armor type dropdown
+    local armorDropdown = CreateFrame("DropdownButton", nil, bar, "WowStyle1DropdownTemplate")
+    armorDropdown:SetPoint("LEFT", slotDropdown, "RIGHT", 10, 0)
+    armorDropdown:SetDefaultText("All")
+
+    local selectedArmor = nil
+    armorDropdown:SetupMenu(function(dropdown, rootDescription)
+        local armorOptions = {
+            { key = nil, name = "All" },
+            { key = "Cloth", name = "Cloth" },
+            { key = "Leather", name = "Leather" },
+            { key = "Mail", name = "Mail" },
+            { key = "Plate", name = "Plate" },
+        }
+        for _, opt in ipairs(armorOptions) do
+            rootDescription:CreateRadio(
+                opt.name,
+                function() return selectedArmor == opt.key end,
+                function()
+                    selectedArmor = opt.key
+                    EquipMap.Filters:SetArmorType(opt.key)
+                    MainFrame:Refresh()
+                end
+            )
+        end
+    end)
+
     -- Dungeon dropdown
     local dungeonDropdown = CreateFrame("DropdownButton", nil, bar, "WowStyle1DropdownTemplate")
-    dungeonDropdown:SetPoint("LEFT", slotDropdown, "RIGHT", 10, 0)
+    dungeonDropdown:SetPoint("LEFT", armorDropdown, "RIGHT", 10, 0)
     dungeonDropdown:SetDefaultText(L["AllDungeons"])
     self.dungeonDropdown = dungeonDropdown
 

@@ -10,8 +10,7 @@ EquipMap.Filters = Filters
 Filters.current = {
     slotID = nil,        -- nil = all slots
     instanceID = nil,    -- nil = all dungeons
-    upgradesOnly = false,
-    notCollected = false,
+    armorType = nil,     -- nil = all; "Cloth", "Leather", "Mail", "Plate"
     specFilter = false,  -- use EJ class/spec filter
     stat1 = nil,         -- nil = any; "crit", "haste", "mastery", "vers"
     stat2 = nil,         -- nil = any; second optional stat filter
@@ -43,14 +42,8 @@ function Filters:MatchesFilters(item, filters)
         end
     end
 
-    if filters.upgradesOnly then
-        if not item.ilvlDelta or item.ilvlDelta <= 0 then
-            return false
-        end
-    end
-
-    if filters.notCollected then
-        if item.owned then
+    if filters.armorType then
+        if item.armorType ~= filters.armorType then
             return false
         end
     end
@@ -89,8 +82,7 @@ end
 function Filters:Reset()
     self.current.slotID = nil
     self.current.instanceID = nil
-    self.current.upgradesOnly = false
-    self.current.notCollected = false
+    self.current.armorType = nil
     self.current.specFilter = false
     self.current.stat1 = nil
     self.current.stat2 = nil
@@ -104,12 +96,9 @@ function Filters:SetDungeon(instanceID)
     self.current.instanceID = (instanceID and instanceID > 0) and instanceID or nil
 end
 
-function Filters:SetUpgradesOnly(enabled)
-    self.current.upgradesOnly = enabled
+function Filters:SetArmorType(armorType)
+    self.current.armorType = armorType
 end
-
-function Filters:SetNotCollected(enabled)
-    self.current.notCollected = enabled
 end
 
 function Filters:SetSpecFilter(enabled)
