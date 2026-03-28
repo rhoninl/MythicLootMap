@@ -396,9 +396,16 @@ function MainFrame:Refresh()
 
     local filteredItems = EquipMap.Filters:GetFilteredItems()
 
-    -- Replace DataProvider in one shot instead of Flush + Insert loop
+    -- Save scroll position before replacing data
+    local scrollPct = scrollBox:GetScrollPercentage() or 0
+
     dataProvider = CreateDataProvider(filteredItems)
     scrollBox:SetDataProvider(dataProvider)
+
+    -- Restore scroll position
+    if scrollPct > 0 then
+        scrollBox:SetScrollPercentage(scrollPct)
+    end
 
     local totalItems = #EquipMap.db.items
     statusText:SetText(string.format("Showing %d / %d items", #filteredItems, totalItems))
