@@ -13,6 +13,7 @@ Filters.current = {
     upgradesOnly = false,
     notCollected = false,
     specFilter = false,  -- use EJ class/spec filter
+    stat = nil,          -- nil = no stat filter; "crit", "haste", "mastery", "vers"
 }
 
 function Filters:Apply(items, filterOverrides)
@@ -29,30 +30,34 @@ function Filters:Apply(items, filterOverrides)
 end
 
 function Filters:MatchesFilters(item, filters)
-    -- Slot filter
     if filters.slotID and filters.slotID > 0 then
         if not self:MatchesSlot(item, filters.slotID) then
             return false
         end
     end
 
-    -- Dungeon filter
     if filters.instanceID and filters.instanceID > 0 then
         if item.instanceID ~= filters.instanceID then
             return false
         end
     end
 
-    -- Upgrades only
     if filters.upgradesOnly then
         if not item.ilvlDelta or item.ilvlDelta <= 0 then
             return false
         end
     end
 
-    -- Not collected (transmog not owned)
     if filters.notCollected then
         if item.owned then
+            return false
+        end
+    end
+
+    -- Stat filter: only show items that have the selected stat > 0
+    if filters.stat then
+        local value = item[filters.stat]
+        if not value or value <= 0 then
             return false
         end
     end
@@ -65,11 +70,8 @@ function Filters:MatchesSlot(item, filterSlotID)
         return true
     end
 
-    -- Ring: slotID 11 or 12 should match filter for either
     if filterSlotID == 11 and item.slotID == 12 then return true end
     if filterSlotID == 12 and item.slotID == 11 then return true end
-
-    -- Trinket: slotID 13 or 14 should match filter for either
     if filterSlotID == 13 and item.slotID == 14 then return true end
     if filterSlotID == 14 and item.slotID == 13 then return true end
 
@@ -82,6 +84,7 @@ function Filters:Reset()
     self.current.upgradesOnly = false
     self.current.notCollected = false
     self.current.specFilter = false
+    self.current.stat = nil
 end
 
 function Filters:SetSlot(slotID)
@@ -102,6 +105,10 @@ end
 
 function Filters:SetSpecFilter(enabled)
     self.current.specFilter = enabled
+end
+
+function Filters:SetStat(stat)
+    self.current.stat = stat
 end
 
 function Filters:GetFilteredItems()

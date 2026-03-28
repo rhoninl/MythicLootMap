@@ -110,3 +110,12 @@ function EquipMap:ResolveSlotID(equipLoc)
 
     return self.EQUIPLOC_TO_SLOT[equipLoc]
 end
+
+function EquipMap:FormatStatNames(item)
+    local names = {}
+    if item.crit and item.crit > 0 then names[#names + 1] = "Crit" end
+    if item.haste and item.haste > 0 then names[#names + 1] = "Haste" end
+    if item.mastery and item.mastery > 0 then names[#names + 1] = "Mastery" end
+    if item.vers and item.vers > 0 then names[#names + 1] = "Vers" end
+    return table.concat(names, " / ")
+end

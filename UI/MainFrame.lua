@@ -7,7 +7,7 @@ local EquipMap = ns
 local MainFrame = {}
 EquipMap.MainFrame = MainFrame
 
-local FRAME_WIDTH = 880
+local FRAME_WIDTH = 960
 local FRAME_HEIGHT = 560
 local ROW_HEIGHT = 28
 local HEADER_HEIGHT = 24
@@ -98,6 +98,34 @@ function MainFrame:CreateFilterBar(parent)
     dungeonDropdown:SetDefaultText("All Dungeons")
     self.dungeonDropdown = dungeonDropdown
 
+    -- Stat filter dropdown
+    local statDropdown = CreateFrame("DropdownButton", nil, bar, "WowStyle1DropdownTemplate")
+    statDropdown:SetPoint("LEFT", dungeonDropdown, "RIGHT", 10, 0)
+    statDropdown:SetDefaultText("All Stats")
+    self.statDropdown = statDropdown
+
+    local selectedStat = nil
+    statDropdown:SetupMenu(function(dropdown, rootDescription)
+        local statOptions = {
+            { key = nil,       name = "All Stats" },
+            { key = "crit",    name = "Crit" },
+            { key = "haste",   name = "Haste" },
+            { key = "mastery", name = "Mastery" },
+            { key = "vers",    name = "Versatility" },
+        }
+        for _, opt in ipairs(statOptions) do
+            rootDescription:CreateRadio(
+                opt.name,
+                function() return selectedStat == opt.key end,
+                function()
+                    selectedStat = opt.key
+                    EquipMap.Filters:SetStat(opt.key)
+                    MainFrame:Refresh()
+                end
+            )
+        end
+    end)
+
     -- Spec filter checkbox
     local specCheck = self:CreateCheckbox(bar, "My Spec", function(checked)
         EquipMap.Filters:SetSpecFilter(checked)
@@ -115,7 +143,7 @@ function MainFrame:CreateFilterBar(parent)
         EquipMap.Data:UpdateComparisons()
         MainFrame:Refresh()
     end)
-    specCheck:SetPoint("LEFT", dungeonDropdown, "RIGHT", 20, 0)
+    specCheck:SetPoint("LEFT", statDropdown, "RIGHT", 10, 0)
     self.specCheck = specCheck
 
     -- Upgrades only checkbox
@@ -159,13 +187,14 @@ function MainFrame:CreateHeaders(parent)
 
     local headers = {
         { text = "", width = 30 },
-        { text = "Item", width = 200 },
-        { text = "iLvl", width = 50 },
-        { text = "Slot", width = 80 },
-        { text = "Dungeon", width = 180 },
-        { text = "Boss", width = 160 },
-        { text = "+/-", width = 60 },
-        { text = "Owned", width = 60 },
+        { text = "Item", width = 180 },
+        { text = "iLvl", width = 45 },
+        { text = "Slot", width = 75 },
+        { text = "Stats", width = 110 },
+        { text = "Dungeon", width = 150 },
+        { text = "Boss", width = 140 },
+        { text = "+/-", width = 50 },
+        { text = "Owned", width = 50 },
     }
 
     local xOffset = 0
@@ -239,37 +268,42 @@ function MainFrame:SetupRowWidgets(row)
 
     row.nameText = row:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     row.nameText:SetPoint("LEFT", 34, 0)
-    row.nameText:SetWidth(196)
+    row.nameText:SetWidth(176)
     row.nameText:SetJustifyH("LEFT")
 
     row.ilvlText = row:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    row.ilvlText:SetPoint("LEFT", 230, 0)
-    row.ilvlText:SetWidth(50)
+    row.ilvlText:SetPoint("LEFT", 210, 0)
+    row.ilvlText:SetWidth(45)
     row.ilvlText:SetJustifyH("LEFT")
 
     row.slotText = row:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    row.slotText:SetPoint("LEFT", 280, 0)
-    row.slotText:SetWidth(80)
+    row.slotText:SetPoint("LEFT", 255, 0)
+    row.slotText:SetWidth(75)
     row.slotText:SetJustifyH("LEFT")
 
+    row.statsText = row:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    row.statsText:SetPoint("LEFT", 330, 0)
+    row.statsText:SetWidth(110)
+    row.statsText:SetJustifyH("LEFT")
+
     row.dungeonText = row:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    row.dungeonText:SetPoint("LEFT", 360, 0)
-    row.dungeonText:SetWidth(180)
+    row.dungeonText:SetPoint("LEFT", 440, 0)
+    row.dungeonText:SetWidth(150)
     row.dungeonText:SetJustifyH("LEFT")
 
     row.bossText = row:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    row.bossText:SetPoint("LEFT", 540, 0)
-    row.bossText:SetWidth(160)
+    row.bossText:SetPoint("LEFT", 590, 0)
+    row.bossText:SetWidth(140)
     row.bossText:SetJustifyH("LEFT")
 
     row.deltaText = row:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    row.deltaText:SetPoint("LEFT", 700, 0)
-    row.deltaText:SetWidth(60)
+    row.deltaText:SetPoint("LEFT", 730, 0)
+    row.deltaText:SetWidth(50)
     row.deltaText:SetJustifyH("LEFT")
 
     row.ownedText = row:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    row.ownedText:SetPoint("LEFT", 760, 0)
-    row.ownedText:SetWidth(60)
+    row.ownedText:SetPoint("LEFT", 780, 0)
+    row.ownedText:SetWidth(50)
     row.ownedText:SetJustifyH("LEFT")
 
     row:EnableMouse(true)
@@ -305,6 +339,7 @@ function MainFrame:SetRowData(row, item)
     row.nameText:SetText(item.itemLink or item.name or "Loading...")
     row.ilvlText:SetText(item.ilvl > 0 and tostring(item.ilvl) or "?")
     row.slotText:SetText(EquipMap:GetSlotName(item.slotID))
+    row.statsText:SetText(EquipMap:FormatStatNames(item))
     row.dungeonText:SetText(item.dungeonName or "")
     row.bossText:SetText(item.encounterName or "")
     row.deltaText:SetText(EquipMap.Compare:FormatDelta(item.ilvlDelta))

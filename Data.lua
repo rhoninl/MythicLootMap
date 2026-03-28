@@ -164,6 +164,10 @@ function Data:BuildItemEntry(info)
         armorType = info.armorType,
         itemLink = info.itemLink,
         ilvl = 0,
+        crit = 0,
+        haste = 0,
+        mastery = 0,
+        vers = 0,
         encounterID = info.encounterID,
         encounterName = info.encounterName,
         instanceID = info.instanceID,
@@ -199,6 +203,18 @@ function Data:EnrichItemEntry(entry)
         end
     else
         pendingItems[entry.itemID] = entry
+    end
+
+    -- Extract secondary stats from item link
+    local link = entry.itemLink
+    if link and GetItemStats then
+        local stats = GetItemStats(link)
+        if stats then
+            entry.crit = stats["ITEM_MOD_CRIT_RATING_SHORT"] or 0
+            entry.haste = stats["ITEM_MOD_HASTE_RATING_SHORT"] or 0
+            entry.mastery = stats["ITEM_MOD_MASTERY_RATING_SHORT"] or 0
+            entry.vers = stats["ITEM_MOD_VERSATILITY"] or 0
+        end
     end
 
     if C_TransmogCollection and C_TransmogCollection.PlayerHasTransmog then
