@@ -7,9 +7,9 @@
 
 Locales.lua
 Utils.lua
-Data.lua
 Compare.lua
 Filters.lua
+Data.lua
 UI/MainFrame.lua
 Core.lua
 

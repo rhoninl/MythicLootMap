@@ -4,6 +4,7 @@
 local ADDON_NAME, ns = ...
 local EquipMap = ns
 
+EquipMap.L = {}
 local translations = {}
 EquipMap.translations = translations
 EquipMap.supportedLocales = { "enUS", "zhCN", "zhTW" }
