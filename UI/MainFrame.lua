@@ -98,28 +98,45 @@ function MainFrame:CreateFilterBar(parent)
     dungeonDropdown:SetDefaultText("All Dungeons")
     self.dungeonDropdown = dungeonDropdown
 
-    -- Stat filter dropdown
-    local statDropdown = CreateFrame("DropdownButton", nil, bar, "WowStyle1DropdownTemplate")
-    statDropdown:SetPoint("LEFT", dungeonDropdown, "RIGHT", 10, 0)
-    statDropdown:SetDefaultText("All Stats")
-    self.statDropdown = statDropdown
+    -- Stat filter dropdowns
+    local statOptions = {
+        { key = nil,       name = "Any" },
+        { key = "crit",    name = "Crit" },
+        { key = "haste",   name = "Haste" },
+        { key = "mastery", name = "Mastery" },
+        { key = "vers",    name = "Vers" },
+    }
 
-    local selectedStat = nil
-    statDropdown:SetupMenu(function(dropdown, rootDescription)
-        local statOptions = {
-            { key = nil,       name = "All Stats" },
-            { key = "crit",    name = "Crit" },
-            { key = "haste",   name = "Haste" },
-            { key = "mastery", name = "Mastery" },
-            { key = "vers",    name = "Versatility" },
-        }
+    local selectedStat1 = nil
+    local stat1Dropdown = CreateFrame("DropdownButton", nil, bar, "WowStyle1DropdownTemplate")
+    stat1Dropdown:SetPoint("LEFT", dungeonDropdown, "RIGHT", 10, 0)
+    stat1Dropdown:SetDefaultText("Stat 1")
+    stat1Dropdown:SetupMenu(function(dropdown, rootDescription)
         for _, opt in ipairs(statOptions) do
             rootDescription:CreateRadio(
                 opt.name,
-                function() return selectedStat == opt.key end,
+                function() return selectedStat1 == opt.key end,
                 function()
-                    selectedStat = opt.key
-                    EquipMap.Filters:SetStat(opt.key)
+                    selectedStat1 = opt.key
+                    EquipMap.Filters:SetStat1(opt.key)
+                    MainFrame:Refresh()
+                end
+            )
+        end
+    end)
+
+    local selectedStat2 = nil
+    local stat2Dropdown = CreateFrame("DropdownButton", nil, bar, "WowStyle1DropdownTemplate")
+    stat2Dropdown:SetPoint("LEFT", stat1Dropdown, "RIGHT", 4, 0)
+    stat2Dropdown:SetDefaultText("Stat 2")
+    stat2Dropdown:SetupMenu(function(dropdown, rootDescription)
+        for _, opt in ipairs(statOptions) do
+            rootDescription:CreateRadio(
+                opt.name,
+                function() return selectedStat2 == opt.key end,
+                function()
+                    selectedStat2 = opt.key
+                    EquipMap.Filters:SetStat2(opt.key)
                     MainFrame:Refresh()
                 end
             )
@@ -143,7 +160,7 @@ function MainFrame:CreateFilterBar(parent)
         EquipMap.Data:UpdateComparisons()
         MainFrame:Refresh()
     end)
-    specCheck:SetPoint("LEFT", statDropdown, "RIGHT", 10, 0)
+    specCheck:SetPoint("LEFT", stat2Dropdown, "RIGHT", 10, 0)
     self.specCheck = specCheck
 
     -- Upgrades only checkbox

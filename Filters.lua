@@ -13,7 +13,8 @@ Filters.current = {
     upgradesOnly = false,
     notCollected = false,
     specFilter = false,  -- use EJ class/spec filter
-    stat = nil,          -- nil = no stat filter; "crit", "haste", "mastery", "vers"
+    stat1 = nil,         -- nil = any; "crit", "haste", "mastery", "vers"
+    stat2 = nil,         -- nil = any; second optional stat filter
 }
 
 function Filters:Apply(items, filterOverrides)
@@ -54,9 +55,16 @@ function Filters:MatchesFilters(item, filters)
         end
     end
 
-    -- Stat filter: only show items that have the selected stat > 0
-    if filters.stat then
-        local value = item[filters.stat]
+    -- Stat filters: item must have both selected stats (if set)
+    if filters.stat1 then
+        local value = item[filters.stat1]
+        if not value or value <= 0 then
+            return false
+        end
+    end
+
+    if filters.stat2 then
+        local value = item[filters.stat2]
         if not value or value <= 0 then
             return false
         end
@@ -84,7 +92,8 @@ function Filters:Reset()
     self.current.upgradesOnly = false
     self.current.notCollected = false
     self.current.specFilter = false
-    self.current.stat = nil
+    self.current.stat1 = nil
+    self.current.stat2 = nil
 end
 
 function Filters:SetSlot(slotID)
@@ -107,8 +116,12 @@ function Filters:SetSpecFilter(enabled)
     self.current.specFilter = enabled
 end
 
-function Filters:SetStat(stat)
-    self.current.stat = stat
+function Filters:SetStat1(stat)
+    self.current.stat1 = stat
+end
+
+function Filters:SetStat2(stat)
+    self.current.stat2 = stat
 end
 
 function Filters:GetFilteredItems()
